@@ -32,7 +32,7 @@ services:
     volumes:
       - ./:/var/www/html
     working_dir: /var/www/html
-    command: ["./vendor/bin/phpstan", "analyse", "src", "tests", "--level=max"]
+    command: ["./vendor/bin/phpstan", "analyse", "src", "tests", "--configuration=phpstan.neon"]
     depends_on:
       - php
 
@@ -45,6 +45,6 @@ services:
     volumes:
       - ./:/var/www/html
     working_dir: /var/www/html
-    command: ["./vendor/bin/php-cs-fixer", "fix", "--dry-run", "--diff", "--verbose"]
+    command: ["./vendor/bin/php-cs-fixer", "fix", "--config=.php-cs-fixer.dist.php", "--dry-run", "--diff", "--verbose"]
     depends_on:
       - php

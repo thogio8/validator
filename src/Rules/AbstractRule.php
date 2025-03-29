@@ -7,25 +7,25 @@ use ValidatorPro\Contracts\RuleInterface;
 abstract class AbstractRule implements RuleInterface
 {
     /**
-     * @var array<int, mixed>
+     * @var array<int|string, mixed>
      */
     protected array $parameters = [];
-    
+
     /**
      * @var string
      */
     protected string $message = 'Validation failed for :attribute';
-    
+
     /**
      * Create a new rule instance
      *
-     * @param array<int, mixed> $parameters
+     * @param array<int|string, mixed> $parameters
      */
     public function __construct(array $parameters = [])
     {
         $this->parameters = $parameters;
     }
-    
+
     /**
      * Get the validation error message
      *
@@ -35,10 +35,10 @@ abstract class AbstractRule implements RuleInterface
     {
         return $this->message;
     }
-    
+
     /**
      * Get the rule name
-     * 
+     *
      * @return string
      */
     public function getName(): string
@@ -47,33 +47,34 @@ abstract class AbstractRule implements RuleInterface
         $className = get_class($this);
         $parts = explode('\\', $className);
         $simpleName = end($parts);
-        
+
         // Remove "Rule" suffix and convert to snake_case
         return $this->camelToSnake(str_replace('Rule', '', $simpleName));
     }
-    
+
     /**
      * Get parameters for this rule
      *
-     * @return array
+     * @return array<int|string, mixed>
      */
     public function getParameters(): array
     {
         return $this->parameters;
     }
-    
+
     /**
      * Set parameters for this rule
      *
-     * @param array $parameters
+     * @param array<int|string, mixed> $parameters
      * @return self
      */
     public function setParameters(array $parameters): self
     {
         $this->parameters = $parameters;
+
         return $this;
     }
-    
+
     /**
      * Set custom error message
      *
@@ -85,9 +86,10 @@ abstract class AbstractRule implements RuleInterface
         if ($message !== null) {
             $this->message = $message;
         }
+
         return $this;
     }
-    
+
     /**
      * Check if this rule supports a specific data type
      *
@@ -98,11 +100,11 @@ abstract class AbstractRule implements RuleInterface
     {
         return true; // By default, rules support all types, override in specific rules
     }
-    
+
     /**
      * Get documentation for this rule
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getDocumentation(): array
     {
@@ -110,10 +112,10 @@ abstract class AbstractRule implements RuleInterface
             'name' => $this->getName(),
             'description' => 'Documentation for ' . $this->getName() . ' rule',
             'parameters' => [],
-            'examples' => []
+            'examples' => [],
         ];
     }
-    
+
     /**
      * Convert camelCase to snake_case
      *
@@ -122,6 +124,10 @@ abstract class AbstractRule implements RuleInterface
      */
     protected function camelToSnake(string $input): string
     {
+        if ($input === '') {
+            return '';
+        }
+
         return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $input));
     }
 }

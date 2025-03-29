@@ -63,17 +63,17 @@ coverage:
 ## Vérifier les standards de codage
 cs-check:
 	@echo "${COLOR_INFO}Vérification des standards de codage...${COLOR_RESET}"
-	$(DOCKER_COMPOSE) run --rm php-cs
+	$(DOCKER_COMPOSE) run --rm php-cs ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run --diff --verbose
 
 ## Corriger les standards de codage
 cs-fix:
 	@echo "${COLOR_INFO}Correction des standards de codage...${COLOR_RESET}"
-	$(DOCKER_COMPOSE) run --rm php-cs ./vendor/bin/php-cs-fixer fix
+	$(DOCKER_COMPOSE) run --rm php-cs ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --verbose
 
 ## Exécuter l'analyse statique
 analyse:
 	@echo "${COLOR_INFO}Exécution de l'analyse statique avec PHPStan...${COLOR_RESET}"
-	$(DOCKER_COMPOSE) run --rm php-analyse
+	$(DOCKER_COMPOSE) run --rm php-analyse ./vendor/bin/phpstan analyse src tests --configuration=phpstan.neon
 
 ## Exécuter Psalm
 psalm:

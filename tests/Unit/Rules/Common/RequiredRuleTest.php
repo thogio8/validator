@@ -11,12 +11,12 @@ class RequiredRuleTest extends TestCase
      * @var RequiredRule
      */
     private RequiredRule $rule;
-    
+
     protected function setUp(): void
     {
         $this->rule = new RequiredRule();
     }
-    
+
     /**
      * @return array<array<mixed>>
      */
@@ -30,7 +30,7 @@ class RequiredRuleTest extends TestCase
             [new \stdClass()],
         ];
     }
-    
+
     /**
      * @return array<array<mixed>>
      */
@@ -42,7 +42,7 @@ class RequiredRuleTest extends TestCase
             [[]],
         ];
     }
-    
+
     /**
      * @test
      * @dataProvider validDataProvider
@@ -52,7 +52,7 @@ class RequiredRuleTest extends TestCase
     {
         $this->assertTrue($this->rule->validate($value));
     }
-    
+
     /**
      * @test
      * @dataProvider invalidDataProvider
@@ -62,7 +62,7 @@ class RequiredRuleTest extends TestCase
     {
         $this->assertFalse($this->rule->validate($value));
     }
-    
+
     /**
      * @test
      */
@@ -70,7 +70,7 @@ class RequiredRuleTest extends TestCase
     {
         $this->assertEquals('required', $this->rule->getName());
     }
-    
+
     /**
      * @test
      */
