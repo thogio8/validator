@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Service PHP principal pour le développement
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: validator-php
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+
+  # Service pour les tests
+  php-test:
+    build:
+      context: .
+      dockerfile: docker/php-test/Dockerfile
+    container_name: validator-test
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+    depends_on:
+      - php
+
+  # Service pour l'analyse statique du code
+  php-analyse:
+    build:
+      context: .
+      dockerfile: docker/php-test/Dockerfile
+    container_name: validator-analyse
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+    command: ["./vendor/bin/phpstan", "analyse", "src", "tests", "--level=max"]
+    depends_on:
+      - php
+
+  # Service pour vérifier les standards de code
+  php-cs:
+    build:
+      context: .
+      dockerfile: docker/php-test/Dockerfile
+    container_name: validator-cs
+    volumes:
+      - ./:/var/www/html
+    working_dir: /var/www/html
+    command: ["./vendor/bin/php-cs-fixer", "fix", "--dry-run", "--diff", "--verbose"]
+    depends_on:
+      - php
