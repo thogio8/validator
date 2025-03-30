@@ -44,9 +44,20 @@ jobs:
       - name: Run static analysis
         run: ./vendor/bin/phpstan analyse --configuration=phpstan.neon
 
-      - name: Run test suite
+      - name: Run PHPUnit tests
         run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
-        continue-on-error: true  # Temporairement autorise l'échec des tests
+
+      - name: Run Infection tests
+        run: |
+          php -d memory_limit=1G ./vendor/bin/infection --threads=4 --min-msi=95 --min-covered-msi=95 --logger-github
+        env:
+          INFECTION_BADGE_API_KEY: ${{ secrets.INFECTION_BADGE_API_KEY }}
+
+      - name: Run Psalm
+        run: |
+          if [ -f psalm.xml ]; then
+            ./vendor/bin/psalm --output-format=github
+          fi
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -99,3 +110,41 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
           force_orphan: true
+
+  quality-report:
+    runs-on: ubuntu-latest
+    needs: build
+    if: always()
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+        continue-on-error: true
+
+      - name: Generate quality report
+        run: |
+          echo "# Quality Report" > quality-report.md
+          echo "## Build Status" >> quality-report.md
+          echo "Result: ${{ needs.build.result }}" >> quality-report.md
+          echo "## Test Results" >> quality-report.md
+          if [ -f artifacts/phpunit/result.txt ]; then
+            echo "### PHPUnit" >> quality-report.md
+            cat artifacts/phpunit/result.txt >> quality-report.md
+          fi
+          if [ -f artifacts/infection/result.txt ]; then
+            echo "### Infection" >> quality-report.md
+            cat artifacts/infection/result.txt >> quality-report.md
+          fi
+          if [ -f artifacts/phpstan/result.txt ]; then
+            echo "### PHPStan" >> quality-report.md
+            cat artifacts/phpstan/result.txt >> quality-report.md
+          fi
+
+      - name: Upload quality report
+        uses: actions/upload-artifact@v3
+        with:
+          name: quality-report
+          path: quality-report.md

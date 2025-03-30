@@ -78,4 +78,15 @@ class RequiredRuleTest extends TestCase
     {
         $this->assertStringContainsString('obligatoire', $this->rule->getMessage());
     }
+
+    /**
+     * @test
+     */
+    public function it_considers_whitespace_only_strings_as_empty(): void
+    {
+        $this->assertFalse($this->rule->validate("   "));
+        $this->assertFalse($this->rule->validate("\t"));
+        $this->assertFalse($this->rule->validate("\n"));
+        $this->assertFalse($this->rule->validate(" \n\t "));
+    }
 }

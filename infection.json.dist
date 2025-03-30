@@ -15,6 +15,6 @@
     "testFramework": "phpunit",
     "bootstrap": "./vendor/autoload.php",
     "timeout": 10,
-    "minMsi": 50,
-    "minCoveredMsi": 70
+    "minMsi": 95,
+    "minCoveredMsi": 95
 }
