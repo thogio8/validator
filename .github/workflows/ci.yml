@@ -88,7 +88,11 @@ jobs:
           tools: composer:v2
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+        run: |
+          # Première tentative avec --prefer-dist
+          composer install --prefer-dist --no-progress || \
+          # En cas d'échec, essayer avec --prefer-source
+          composer install --prefer-source --no-progress
 
       - name: Install phpDocumentor directly
         run: |
