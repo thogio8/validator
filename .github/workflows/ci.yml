@@ -44,6 +44,11 @@ jobs:
       - name: Run static analysis
         run: ./vendor/bin/phpstan analyse --configuration=phpstan.neon
 
+      - name: Create test directories
+        run: |
+          mkdir -p tests/Integration
+          mkdir -p tests/Functional
+
       - name: Run PHPUnit tests
         run: ./vendor/bin/phpunit --coverage-clover=coverage.xml
 
