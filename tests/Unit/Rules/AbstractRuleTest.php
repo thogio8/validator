@@ -84,7 +84,7 @@ class AbstractRuleTest extends TestCase
             ['camelCase', 'camel_case'],
             ['ThisIsATest', 'this_is_a_test'],
             ['', ''],
-            ['simpleText', 'simple_text']
+            ['simpleText', 'simple_text'],
         ];
     }
 }
