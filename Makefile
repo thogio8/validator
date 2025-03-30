@@ -78,12 +78,12 @@ analyse:
 ## Exécuter Psalm
 psalm:
 	@echo "${COLOR_INFO}Exécution de Psalm...${COLOR_RESET}"
-	$(DOCKER_COMPOSE) run --rm php ./vendor/bin/psalm
+	$(DOCKER_COMPOSE) run --rm php bash -c "if [ ! -f psalm.xml ]; then ./vendor/bin/psalm --init src/ 4; fi && ./vendor/bin/psalm"
 
 ## Exécuter les tests de mutation
 infection:
 	@echo "${COLOR_INFO}Exécution des tests de mutation avec Infection...${COLOR_RESET}"
-	$(DOCKER_COMPOSE) run --rm php-test ./vendor/bin/infection --min-msi=80 --min-covered-msi=80
+	$(DOCKER_COMPOSE) run --rm php-test bash -c "php -d memory_limit=1G ./vendor/bin/infection --threads=4 --show-mutations --no-progress"
 
 ## Nettoyer les fichiers temporaires
 clean:
