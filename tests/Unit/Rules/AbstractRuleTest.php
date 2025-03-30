@@ -78,6 +78,9 @@ class AbstractRuleTest extends TestCase
         $this->assertSame($expectedDescription, $documentation['description']);
     }
 
+    /**
+     * @return array<int, array<int, string>>
+     */
     public function camelToSnakeProvider(): array
     {
         return [
@@ -86,6 +89,18 @@ class AbstractRuleTest extends TestCase
             ['', ''],
             ['simpleText', 'simple_text'],
         ];
+    }
+
+    /**
+     * @test
+     */
+    public function it_supports_all_types_by_default(): void
+    {
+        // Test that the method returns true for any type
+        $this->assertTrue($this->rule->supportsType('string'));
+        $this->assertTrue($this->rule->supportsType('integer'));
+        $this->assertTrue($this->rule->supportsType('boolean'));
+        $this->assertTrue($this->rule->supportsType('any_other_type'));
     }
 }
 
@@ -102,5 +117,10 @@ class TestableAbstractRule extends AbstractRule
     public function testCamelToSnake(string $input): string
     {
         return $this->camelToSnake($input);
+    }
+
+    public function getName(): string
+    {
+        return 'testable';
     }
 }
