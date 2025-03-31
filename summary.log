@@ -1,10 +1,10 @@
-Total: 27
+Total: 127
 
-Killed: 27
+Killed: 98
 Errored: 0
 Syntax Errors: 0
-Escaped: 0
+Escaped: 12
 Timed Out: 0
 Skipped: 0
 Ignored: 0
-Not Covered: 0
+Not Covered: 17
