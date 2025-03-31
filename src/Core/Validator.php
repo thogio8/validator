@@ -45,21 +45,21 @@ class Validator implements ValidatorInterface
             if (is_array($rules)) {
                 $contextRules = $this->context->getRules();
                 // Assurons-nous que les règles ne sont pas vides
-                if (!empty($contextRules)) {
+                if (! empty($contextRules)) {
                     $rules = array_merge($contextRules, $rules);
                 }
             }
 
             // Combiner les messages d'erreur personnalisés
             $contextMessages = $this->context->getMessages();
-            if (!empty($contextMessages)) {
+            if (! empty($contextMessages)) {
                 $messages = array_merge($contextMessages, $messages);
             }
 
             // Ajouter des attributs de contexte aux données
             $contextAttributes = $this->context->getAttributes();
             foreach ($contextAttributes as $key => $value) {
-                if (!isset($data[$key])) {
+                if (! isset($data[$key])) {
                     $data[$key] = $value;
                 }
             }
@@ -75,6 +75,7 @@ class Validator implements ValidatorInterface
             foreach ($fieldRules as $ruleName => $parameters) {
                 if ($ruleName === 'nullable') {
                     $isNullable = true;
+
                     // Il est sûr d'utiliser break ici car nous n'avons plus besoin de vérifier
                     // d'autres règles pour savoir si le champ est nullable
                     break;
@@ -86,6 +87,7 @@ class Validator implements ValidatorInterface
                 // Important d'ajouter le champ aux champs validés et aux données valides
                 $result->addValidatedField($field);
                 $result->addValidData($field, $value);
+
                 // Continue est essentiel ici pour passer au champ suivant
                 continue;
             }
@@ -105,7 +107,7 @@ class Validator implements ValidatorInterface
                 }
 
                 // Appliquer la règle
-                if (!$rule->validate($value, $parameters, $data)) {
+                if (! $rule->validate($value, $parameters, $data)) {
                     // Prioriser les messages selon un ordre précis
                     $messageKey = "{$field}.{$ruleName}";
                     // Vérifier chaque niveau de manière explicite
@@ -123,6 +125,7 @@ class Validator implements ValidatorInterface
                     $message = str_replace(':attribute', $field, $message);
                     $result->addError($field, $message);
                     $fieldValid = false;
+
                     // Break essentiel ici pour arrêter la validation de ce champ
                     break;
                 }
@@ -143,7 +146,7 @@ class Validator implements ValidatorInterface
     {
         // Vérifier si c'est un callable mais pas un RuleInterface
         // Le instanceof est plus spécifique et doit être vérifié en premier
-        if (is_callable($rule) && !($rule instanceof RuleInterface)) {
+        if (is_callable($rule) && ! ($rule instanceof RuleInterface)) {
             // On transforme le callable en CallableRule
             $rule = new CallableRule($rule, $name);
         }
@@ -169,6 +172,7 @@ class Validator implements ValidatorInterface
             $rulesArray = $this->parseRuleString($rules);
             // Définir un nom de champ par défaut
             $compiled->addField('_default', $rulesArray);
+
             return $compiled;
         }
 
@@ -218,14 +222,14 @@ class Validator implements ValidatorInterface
                     if ($char === '"') {
                         // Si c'est le premier caractère ou le caractère précédent n'est pas un backslash
                         if ($i === 0 || $paramsString[$i - 1] !== '\\') {
-                            $inQuotes = !$inQuotes;
+                            $inQuotes = ! $inQuotes;
                         } else {
                             // C'est un guillemet échappé, l'ajouter sans le backslash
                             $currentParam = substr($currentParam, 0, -1) . $char;
                         }
                     }
                     // Si on trouve une virgule hors des guillemets, c'est un séparateur de paramètres
-                    elseif ($char === ',' && !$inQuotes) {
+                    elseif ($char === ',' && ! $inQuotes) {
                         $parameters[] = $currentParam;
                         $currentParam = '';
                     }
