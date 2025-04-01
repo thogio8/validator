@@ -4,22 +4,34 @@ namespace ValidatorPro\Rules;
 
 use ValidatorPro\Contracts\RuleInterface;
 
+/**
+ * Abstract base class for validation rules.
+ *
+ * This class provides common functionality for validation rules,
+ * including parameter management, error messages, and naming conventions.
+ * Specific validation rules should extend this class and implement
+ * the validate method.
+ */
 abstract class AbstractRule implements RuleInterface
 {
     /**
-     * @var array<int|string, mixed>
+     * Parameters for the validation rule.
+     *
+     * @var array<int|string, mixed> Rule parameters
      */
     protected array $parameters = [];
 
     /**
-     * @var string
+     * Default error message for the validation rule.
+     *
+     * @var string Default error message template
      */
     protected string $message = 'Validation failed for :attribute';
 
     /**
-     * Create a new rule instance
+     * Creates a new rule instance.
      *
-     * @param array<int|string, mixed> $parameters
+     * @param array<int|string, mixed> $parameters Initial parameters for the rule
      */
     public function __construct(array $parameters = [])
     {
@@ -27,9 +39,9 @@ abstract class AbstractRule implements RuleInterface
     }
 
     /**
-     * Get the validation error message
+     * Gets the validation error message.
      *
-     * @return string
+     * @return string The error message template
      */
     public function getMessage(): string
     {
@@ -37,9 +49,12 @@ abstract class AbstractRule implements RuleInterface
     }
 
     /**
-     * Get the rule name
+     * Gets the rule name by extracting it from the class name.
      *
-     * @return string
+     * Converts the class name (without namespace and "Rule" suffix)
+     * to snake_case for the rule name.
+     *
+     * @return string The rule name in snake_case
      */
     public function getName(): string
     {
@@ -53,9 +68,9 @@ abstract class AbstractRule implements RuleInterface
     }
 
     /**
-     * Get parameters for this rule
+     * Gets parameters for this rule.
      *
-     * @return array<int|string, mixed>
+     * @return array<int|string, mixed> The current parameters
      */
     public function getParameters(): array
     {
@@ -63,10 +78,10 @@ abstract class AbstractRule implements RuleInterface
     }
 
     /**
-     * Set parameters for this rule
+     * Sets parameters for this rule.
      *
-     * @param array<int|string, mixed> $parameters
-     * @return self
+     * @param array<int|string, mixed> $parameters The parameters to set
+     * @return self The current instance for method chaining
      */
     public function setParameters(array $parameters): self
     {
@@ -76,10 +91,10 @@ abstract class AbstractRule implements RuleInterface
     }
 
     /**
-     * Set custom error message
+     * Sets custom error message.
      *
-     * @param string|null $message
-     * @return self
+     * @param string|null $message The custom error message or null to use default
+     * @return self The current instance for method chaining
      */
     public function setErrorMessage(?string $message): self
     {
@@ -91,10 +106,13 @@ abstract class AbstractRule implements RuleInterface
     }
 
     /**
-     * Check if this rule supports a specific data type
+     * Checks if this rule supports a specific data type.
      *
-     * @param string $type
-     * @return bool
+     * By default, rules support all types. Override in specific rules
+     * to restrict to certain types.
+     *
+     * @param string $type The data type to check
+     * @return bool True if this rule supports the type, false otherwise
      */
     public function supportsType(string $type): bool
     {
@@ -102,9 +120,9 @@ abstract class AbstractRule implements RuleInterface
     }
 
     /**
-     * Get documentation for this rule
+     * Gets documentation for this rule.
      *
-     * @return array<string, mixed>
+     * @return array<string, mixed> Documentation array with keys like 'name', 'description', 'parameters', 'examples'
      */
     public function getDocumentation(): array
     {
@@ -117,10 +135,10 @@ abstract class AbstractRule implements RuleInterface
     }
 
     /**
-     * Convert camelCase to snake_case
+     * Converts camelCase to snake_case.
      *
-     * @param string $input
-     * @return string
+     * @param string $input String in camelCase format
+     * @return string String in snake_case format
      */
     protected function camelToSnake(string $input): string
     {

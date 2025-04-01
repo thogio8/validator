@@ -109,7 +109,7 @@ class AbstractRuleTest extends TestCase
  */
 class TestableAbstractRule extends AbstractRule
 {
-    public function validate($value, array $parameters = [], array $data = []): bool
+    public function validate(mixed $value, array $parameters = [], array $data = []): bool
     {
         return true;
     }

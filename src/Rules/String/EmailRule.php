@@ -19,7 +19,7 @@ class EmailRule extends AbstractRule
      * @param array<string, mixed> $data
      * @return bool
      */
-    public function validate($value, array $parameters = [], array $data = []): bool
+    public function validate(mixed $value, array $parameters = [], array $data = []): bool
     {
         // Vérifie que la valeur est une chaîne
         if (! is_string($value)) {
