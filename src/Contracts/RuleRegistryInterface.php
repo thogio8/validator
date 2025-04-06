@@ -5,43 +5,43 @@ namespace ValidatorPro\Contracts;
 use InvalidArgumentException;
 
 /**
- * Interface pour le registre des règles de validation.
+ * Interface for validation rule registry.
  *
- * Cette interface définit le contrat pour les objets de registre qui stockent
- * et gèrent les règles de validation disponibles pour le validateur.
+ * This interface defines the contract for registry objects that store
+ * and manage available validation rules for the validator.
  */
 interface RuleRegistryInterface
 {
     /**
-     * Enregistre une règle dans le registre.
+     * Registers a rule in the registry.
      *
-     * @param string $name Le nom de la règle
-     * @param RuleInterface $rule L'instance de la règle
-     * @return self L'instance courante pour le chaînage de méthodes
-     * @throws InvalidArgumentException Si le nom de la règle est vide
+     * @param string $name The name of the rule
+     * @param RuleInterface $rule The rule instance
+     * @return self The current instance for method chaining
+     * @throws InvalidArgumentException If the rule name is empty
      */
     public function register(string $name, RuleInterface $rule): self;
 
     /**
-     * Récupère une règle par son nom.
+     * Retrieves a rule by its name.
      *
-     * @param string $name Le nom de la règle à récupérer
-     * @return RuleInterface|null L'instance de la règle ou null si non trouvée
+     * @param string $name The name of the rule to retrieve
+     * @return RuleInterface|null The rule instance or null if not found
      */
     public function get(string $name): ?RuleInterface;
 
     /**
-     * Vérifie si une règle existe dans le registre.
+     * Checks if a rule exists in the registry.
      *
-     * @param string $name Le nom de la règle à vérifier
-     * @return bool True si la règle existe, false sinon
+     * @param string $name The name of the rule to check
+     * @return bool True if the rule exists, false otherwise
      */
     public function has(string $name): bool;
 
     /**
-     * Récupère toutes les règles disponibles dans le registre.
+     * Retrieves all available rules in the registry.
      *
-     * @return array<string, RuleInterface> Toutes les règles indexées par leur nom
+     * @return array<string, RuleInterface> All rules indexed by their name
      */
     public function all(): array;
 }
