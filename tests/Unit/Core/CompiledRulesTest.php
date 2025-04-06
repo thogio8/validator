@@ -326,4 +326,260 @@ class CompiledRulesTest extends TestCase
 
         $this->assertEquals($expected, $this->compiledRules->getCompiledRules());
     }
+
+    /**
+     * @test
+     */
+    public function it_handles_array_rules_without_name_attribute(): void
+    {
+        $rule = ['not_name' => 'value', 'other' => 'test'];
+        $this->compiledRules->addRule('field', [$rule]);
+
+        $expected = [
+            'field' => [
+                ['name' => 'unknown', 'parameters' => []],
+            ],
+        ];
+
+        $this->assertEquals($expected, $this->compiledRules->getCompiledRules());
+    }
+
+    /**
+     * @test
+     */
+    public function it_compiles_rules_during_initialization(): void
+    {
+        // On vérifie que les règles sont compilées dans le constructeur
+        $rules = ['field' => 'required|email'];
+        $compiledRules = new CompiledRules($rules);
+
+        // Vérifier que les règles ont été compilées
+        $expected = [
+            'field' => [
+                ['name' => 'required', 'parameters' => []],
+                ['name' => 'email', 'parameters' => []],
+            ],
+        ];
+
+        $this->assertEquals($expected, $compiledRules->getCompiledRules());
+
+        // Vérifier que si on passe des règles pré-compilées, elles ne sont pas recompilées
+        $preCompiled = [
+            'field' => [
+                ['name' => 'custom', 'parameters' => []],
+            ],
+        ];
+
+        $compiledRulesWithPreCompiled = new CompiledRules($rules, $preCompiled);
+        $this->assertEquals($preCompiled, $compiledRulesWithPreCompiled->getCompiledRules());
+    }
+
+    /**
+     * @test
+     */
+    public function it_correctly_handles_rules_with_colons_in_parameters(): void
+    {
+        $this->compiledRules->addRule('field', 'regex:/^\d{3}:\d{2}$/');
+
+        $expected = [
+            'field' => [
+                ['name' => 'regex', 'parameters' => ['/^\d{3}:\d{2}$/']],
+            ],
+        ];
+
+        $this->assertEquals($expected, $this->compiledRules->getCompiledRules());
+
+        // Tester aussi un cas plus complexe
+        $this->compiledRules->addRule('another', 'date_format:Y-m-d H:i:s');
+
+        $expectedWithDateFormat = [
+            'field' => [
+                ['name' => 'regex', 'parameters' => ['/^\d{3}:\d{2}$/']],
+            ],
+            'another' => [
+                ['name' => 'date_format', 'parameters' => ['Y-m-d H:i:s']],
+            ],
+        ];
+
+        $this->assertEquals($expectedWithDateFormat, $this->compiledRules->getCompiledRules());
+    }
+
+    /**
+     * @test
+     */
+    public function it_handles_object_rules_with_to_string(): void
+    {
+        // Créer un objet avec __toString
+        $stringableObject = new class () {
+            public function __toString()
+            {
+                return 'custom_rule';
+            }
+        };
+
+        $this->compiledRules->addRule('field', $stringableObject);
+
+        $expected = [
+            'field' => [
+                ['name' => 'custom_rule', 'parameters' => []],
+            ],
+        ];
+
+        $this->assertEquals($expected, $this->compiledRules->getCompiledRules());
+
+        // Objet sans __toString
+        $nonStringableObject = new \stdClass();
+        $this->compiledRules->addRule('another', $nonStringableObject);
+
+        $expectedWithStdClass = [
+            'field' => [
+                ['name' => 'custom_rule', 'parameters' => []],
+            ],
+            'another' => [
+                ['name' => 'unknown', 'parameters' => []],
+            ],
+        ];
+
+        $this->assertEquals($expectedWithStdClass, $this->compiledRules->getCompiledRules());
+    }
+
+    /**
+     * @test
+     */
+    public function it_handles_array_of_mixed_rules(): void
+    {
+        // Un tableau contenant différents types de règles
+        $rules = [
+            'string_rule',
+            ['name' => 'array_rule', 'parameters' => ['param1']],
+            new \stdClass(),
+        ];
+
+        $this->compiledRules->addRule('field', $rules);
+
+        $expected = [
+            'field' => [
+                ['name' => 'string_rule', 'parameters' => []],
+                ['name' => 'array_rule', 'parameters' => ['param1']],
+                ['name' => 'unknown', 'parameters' => []],
+            ],
+        ];
+
+        $this->assertEquals($expected, $this->compiledRules->getCompiledRules());
+    }
+
+    /**
+     * @test
+     */
+    public function it_explicitly_casts_object_to_string(): void
+    {
+        // Objet avec __toString retournant un résultat spécifique
+        // dont on peut vérifier qu'il est bien le résultat du cast
+        $obj = new class () {
+            private int $count = 0;
+
+            public function __toString(): string
+            {
+                $this->count++;
+
+                return 'object_string_' . $this->count;
+            }
+
+            public function getCount(): int
+            {
+                return $this->count;
+            }
+        };
+
+        // Premier usage de l'objet comme règle
+        $this->compiledRules->addRule('field1', $obj);
+
+        // À ce stade, __toString a été appelé une fois
+        $this->assertEquals(1, $obj->getCount(), '__toString method should be called once');
+
+        $expected1 = [
+            'field1' => [
+                ['name' => 'object_string_1', 'parameters' => []],
+            ],
+        ];
+
+        $this->assertEquals($expected1, $this->compiledRules->getCompiledRules());
+
+        // Deuxième usage de l'objet mais dans un tableau de règles
+        $this->compiledRules->addRule('field2', [$obj]);
+
+        // __toString a été appelé une seconde fois
+        $this->assertEquals(2, $obj->getCount(), '__toString method should be called twice');
+
+        $expected2 = [
+            'field1' => [
+                ['name' => 'object_string_1', 'parameters' => []],
+            ],
+            'field2' => [
+                ['name' => 'object_string_2', 'parameters' => []],
+            ],
+        ];
+
+        $this->assertEquals($expected2, $this->compiledRules->getCompiledRules());
+    }
+
+    /**
+     * @test
+     */
+    public function it_allows_extending_compile_initial_rules(): void
+    {
+        // Créer une sous-classe qui surcharge compileInitialRules
+        $customRulesClass = new class () extends CompiledRules {
+            public bool $compileWasCalled = false;
+
+            protected function compileInitialRules(): void
+            {
+                // Marquer qu'on est passé par notre implémentation
+                $this->compileWasCalled = true;
+
+                // Appeler l'implémentation parente pour maintenir le comportement
+                parent::compileInitialRules();
+            }
+        };
+
+        // Créer une instance avec des règles non vides pour déclencher compileInitialRules
+        $customRules = new $customRulesClass(['field' => 'required']);
+
+        // Vérifier que la méthode surchargée a été appelée lors de l'initialisation
+        $this->assertTrue($customRules->compileWasCalled, 'Overridden compileInitialRules should be called');
+
+        // Vérifier également que les règles ont été correctement compilées
+        $expected = [
+            'field' => [
+                ['name' => 'required', 'parameters' => []],
+            ],
+        ];
+
+        $this->assertEquals($expected, $customRules->getCompiledRules());
+
+        // Testons aussi avec un autre objet mais avec des règles pré-compilées
+        // Dans ce cas, compileInitialRules ne devrait pas être appelé
+        $anotherCustomRules = new $customRulesClass(
+            ['field' => 'required'],
+            ['field' => [['name' => 'precompiled', 'parameters' => []]]]
+        );
+
+        // Réinitialiser le flag
+        $anotherCustomRules->compileWasCalled = false;
+
+        // Vérifier que compileInitialRules n'a pas été appelé
+        $this->assertFalse(
+            $anotherCustomRules->compileWasCalled,
+            'compileInitialRules should not be called when precompiled rules are provided'
+        );
+
+        // Vérifier que les règles pré-compilées sont conservées
+        $expectedPrecompiled = [
+            'field' => [
+                ['name' => 'precompiled', 'parameters' => []],
+            ],
+        ];
+
+        $this->assertEquals($expectedPrecompiled, $anotherCustomRules->getCompiledRules());
+    }
 }
