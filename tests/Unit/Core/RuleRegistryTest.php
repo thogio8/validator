@@ -8,12 +8,16 @@ use ValidatorPro\Contracts\RuleInterface;
 use ValidatorPro\Core\RuleRegistry;
 
 /**
- * Tests unitaires pour la classe RuleRegistry.
+ * Unit tests for the RuleRegistry class.
+ *
+ * These tests verify the behavior of the RuleRegistry class,
+ * ensuring that rule registration, retrieval, and management
+ * work correctly under various scenarios.
  */
 class RuleRegistryTest extends TestCase
 {
     /**
-     * Vérifie que le registre peut être créé vide.
+     * Checks that the registry can be created empty.
      *
      * @test
      */
@@ -25,7 +29,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que le registre peut être créé avec des règles initiales.
+     * Checks that the registry can be created with initial rules.
      *
      * @test
      */
@@ -45,34 +49,34 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que le constructeur accepte des objets qui implémentent RuleInterface.
+     * Checks that the constructor accepts objects implementing RuleInterface.
      *
      * @test
      */
     public function it_accepts_correctly_typed_rules_in_constructor(): void
     {
-        // Créer plusieurs mocks de RuleInterface
+        // Create multiple RuleInterface mocks
         $firstRule = $this->createMock(RuleInterface::class);
         $secondRule = $this->createMock(RuleInterface::class);
 
-        // Créer un tableau associant des noms à ces règles
+        // Create an array associating names with these rules
         $rules = [
             'first_rule' => $firstRule,
             'second_rule' => $secondRule,
         ];
 
-        // Créer une instance de RuleRegistry avec ce tableau
+        // Create a RuleRegistry instance with this array
         $registry = new RuleRegistry($rules);
 
-        // Vérifier que toutes les règles sont bien présentes
+        // Check that all rules are present
         $this->assertTrue($registry->has('first_rule'));
         $this->assertTrue($registry->has('second_rule'));
 
-        // Vérifier que get() retourne bien les instances attendues
+        // Check that get() returns the expected instances
         $this->assertSame($firstRule, $registry->get('first_rule'));
         $this->assertSame($secondRule, $registry->get('second_rule'));
 
-        // Vérifier que all() retourne le tableau complet
+        // Check that all() returns the complete array
         $allRules = $registry->all();
         $this->assertCount(2, $allRules);
         $this->assertArrayHasKey('first_rule', $allRules);
@@ -80,7 +84,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie l'enregistrement d'une règle.
+     * Checks rule registration.
      *
      * @test
      */
@@ -97,7 +101,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que la méthode register retourne l'instance courante (pour chaînage).
+     * Checks that the register method returns the current instance (for chaining).
      *
      * @test
      */
@@ -114,7 +118,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que l'exception appropriée est lancée avec un nom vide.
+     * Checks that the appropriate exception is thrown with an empty name.
      *
      * @test
      */
@@ -125,13 +129,13 @@ class RuleRegistryTest extends TestCase
         $mockRule = $this->createMock(RuleInterface::class);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Le nom de la règle ne peut pas être vide');
+        $this->expectExceptionMessage('Rule name cannot be empty');
 
         $ruleRegistry->register('', $mockRule);
     }
 
     /**
-     * Vérifie que l'enregistrement d'une règle avec un nom existant remplace l'ancienne règle.
+     * Checks that registering a rule with an existing name replaces the old rule.
      *
      * @test
      */
@@ -151,7 +155,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie la récupération d'une règle enregistrée.
+     * Checks the retrieval of a registered rule.
      *
      * @test
      */
@@ -168,7 +172,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que null est retourné pour une règle inexistante.
+     * Checks that null is returned for a non-existent rule.
      *
      * @test
      */
@@ -180,7 +184,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que l'instance récupérée est celle qui a été enregistrée.
+     * Checks that the retrieved instance is the one that was registered.
      *
      * @test
      */
@@ -198,7 +202,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que has() retourne true pour une règle existante.
+     * Checks that has() returns true for an existing rule.
      *
      * @test
      */
@@ -215,7 +219,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que has() retourne false pour une règle inexistante.
+     * Checks that has() returns false for a non-existent rule.
      *
      * @test
      */
@@ -227,7 +231,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que has() retourne true si et seulement si get() retourne une valeur non null.
+     * Checks that has() returns true if and only if get() returns a non-null value.
      *
      * @test
      */
@@ -244,7 +248,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que all() retourne un tableau vide sur un registre vide.
+     * Checks that all() returns an empty array for an empty registry.
      *
      * @test
      */
@@ -256,7 +260,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que all() retourne toutes les règles enregistrées.
+     * Checks that all() returns all registered rules.
      *
      * @test
      */
@@ -280,7 +284,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que le tableau retourné par all() a les noms de règles comme clés.
+     * Checks that the array returned by all() has rule names as keys.
      *
      * @test
      */
@@ -304,7 +308,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que les règles enregistrées persistent entre différents appels de méthodes.
+     * Checks that registered rules persist between different method calls.
      *
      * @test
      */
@@ -329,7 +333,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que les types retournés correspondent à ceux attendus.
+     * Checks that the returned types correspond to the expected ones.
      *
      * @test
      */
@@ -349,7 +353,7 @@ class RuleRegistryTest extends TestCase
     }
 
     /**
-     * Vérifie que les noms de règles sont sensibles à la casse.
+     * Checks that rule names are case-sensitive.
      *
      * @test
      */

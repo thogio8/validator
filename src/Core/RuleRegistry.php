@@ -6,19 +6,26 @@ use InvalidArgumentException;
 use ValidatorPro\Contracts\RuleInterface;
 use ValidatorPro\Contracts\RuleRegistryInterface;
 
+/**
+ * Rule Registry for managing validation rules.
+ *
+ * This class provides a centralized storage and management system for validation rules,
+ * allowing registration, retrieval, and checking of available rules in the validator.
+ * It implements the RuleRegistryInterface and follows the Single Responsibility Principle.
+ */
 class RuleRegistry implements RuleRegistryInterface
 {
     /**
-     * Tableau des règles enregistrées.
+     * Array of registered rules.
      *
      * @var array<string, RuleInterface>
      */
     private array $rules = [];
 
     /**
-     * Crée une nouvelle instance de registre de règles.
+     * Creates a new rule registry instance.
      *
-     * @param array<string, RuleInterface> $rules Règles initiales à enregistrer
+     * @param array<string, RuleInterface> $rules Initial rules to register
      */
     public function __construct(array $rules = [])
     {
@@ -26,17 +33,17 @@ class RuleRegistry implements RuleRegistryInterface
     }
 
     /**
-     * Enregistre une règle dans le registre.
+     * Registers a rule in the registry.
      *
-     * @param string $name Le nom de la règle
-     * @param RuleInterface $rule L'instance de la règle
-     * @return self L'instance courante pour le chaînage de méthodes
-     * @throws InvalidArgumentException Si le nom de la règle est vide
+     * @param string $name The name of the rule
+     * @param RuleInterface $rule The rule instance
+     * @return self The current instance for method chaining
+     * @throws InvalidArgumentException If the rule name is empty
      */
     public function register(string $name, RuleInterface $rule): self
     {
         if (empty($name)) {
-            throw new InvalidArgumentException('Le nom de la règle ne peut pas être vide');
+            throw new InvalidArgumentException('Rule name cannot be empty');
         }
 
         $this->rules[$name] = $rule;
@@ -45,10 +52,10 @@ class RuleRegistry implements RuleRegistryInterface
     }
 
     /**
-     * Récupère une règle par son nom.
+     * Retrieves a rule by its name.
      *
-     * @param string $name Le nom de la règle à récupérer
-     * @return RuleInterface|null L'instance de la règle ou null si non trouvée
+     * @param string $name The name of the rule to retrieve
+     * @return RuleInterface|null The rule instance or null if not found
      */
     public function get(string $name): ?RuleInterface
     {
@@ -56,10 +63,10 @@ class RuleRegistry implements RuleRegistryInterface
     }
 
     /**
-     * Vérifie si une règle existe dans le registre.
+     * Checks if a rule exists in the registry.
      *
-     * @param string $name Le nom de la règle à vérifier
-     * @return bool True si la règle existe, false sinon
+     * @param string $name The name of the rule to check
+     * @return bool True if the rule exists, false otherwise
      */
     public function has(string $name): bool
     {
@@ -67,9 +74,9 @@ class RuleRegistry implements RuleRegistryInterface
     }
 
     /**
-     * Récupère toutes les règles disponibles dans le registre.
+     * Retrieves all available rules in the registry.
      *
-     * @return array<string, RuleInterface> Toutes les règles indexées par leur nom
+     * @return array<string, RuleInterface> All rules indexed by their name
      */
     public function all(): array
     {
