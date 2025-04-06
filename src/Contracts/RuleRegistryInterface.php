@@ -2,6 +2,8 @@
 
 namespace ValidatorPro\Contracts;
 
+use InvalidArgumentException;
+
 /**
  * Interface pour le registre des règles de validation.
  *
@@ -16,6 +18,7 @@ interface RuleRegistryInterface
      * @param string $name Le nom de la règle
      * @param RuleInterface $rule L'instance de la règle
      * @return self L'instance courante pour le chaînage de méthodes
+     * @throws InvalidArgumentException Si le nom de la règle est vide
      */
     public function register(string $name, RuleInterface $rule): self;
 
