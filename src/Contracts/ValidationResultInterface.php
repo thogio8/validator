@@ -91,4 +91,13 @@ interface ValidationResultInterface
      * @return array<string> Array of validated field names
      */
     public function getValidatedFields(): array;
+
+    /**
+     * Adds a valid data field to the validation result.
+     *
+     * @param string $field The field name
+     * @param mixed $value The field value
+     * @return self The current instance for method chaining
+     */
+    public function addValidData(string $field, mixed $value): self;
 }

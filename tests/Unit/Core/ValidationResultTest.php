@@ -244,4 +244,112 @@ class ValidationResultTest extends TestCase
         $result = new ValidationResult(['field' => []]);
         $this->assertNull($result->getError('field'));
     }
+
+    /**
+     * @test
+     */
+    public function add_valid_data_adds_field_to_valid_data(): void
+    {
+        $result = new ValidationResult();
+
+        $this->assertEmpty($result->getValidData());
+
+        $result->addValidData('field', 'value');
+
+        $this->assertNotEmpty($result->getValidData());
+        $this->assertEquals(['field' => 'value'], $result->getValidData());
+    }
+
+    /**
+     * @test
+     */
+    public function add_valid_data_overwrites_existing_field(): void
+    {
+        $result = new ValidationResult();
+
+        $result->addValidData('field', 'value1');
+        $this->assertEquals('value1', $result->getValidData()['field']);
+
+        $result->addValidData('field', 'value2');
+        $this->assertEquals('value2', $result->getValidData()['field']);
+    }
+
+    /**
+     * @test
+     */
+    public function add_valid_data_preserves_other_fields(): void
+    {
+        $result = new ValidationResult();
+
+        $result->addValidData('field1', 'value1');
+        $result->addValidData('field2', 'value2');
+
+        $expected = [
+            'field1' => 'value1',
+            'field2' => 'value2',
+        ];
+
+        $this->assertEquals($expected, $result->getValidData());
+    }
+
+    /**
+     * @test
+     */
+    public function add_valid_data_returns_self_for_chaining(): void
+    {
+        $result = new ValidationResult();
+
+        $returnValue = $result->addValidData('field', 'value');
+
+        $this->assertSame($result, $returnValue);
+    }
+
+    /**
+     * @test
+     */
+    public function add_valid_data_accepts_various_data_types(): void
+    {
+        $result = new ValidationResult();
+
+        // Test avec différents types de données
+        $result->addValidData('string', 'value');
+        $result->addValidData('integer', 42);
+        $result->addValidData('float', 3.14);
+        $result->addValidData('boolean', true);
+        $result->addValidData('array', ['key' => 'value']);
+        $result->addValidData('null', null);
+        $result->addValidData('object', new \stdClass());
+
+        $validData = $result->getValidData();
+
+        $this->assertIsString($validData['string']);
+        $this->assertIsInt($validData['integer']);
+        $this->assertIsFloat($validData['float']);
+        $this->assertIsBool($validData['boolean']);
+        $this->assertIsArray($validData['array']);
+        $this->assertNull($validData['null']);
+        $this->assertIsObject($validData['object']);
+    }
+
+    /**
+     * @test
+     */
+    public function add_valid_data_with_nested_field_structure(): void
+    {
+        $result = new ValidationResult();
+
+        $nestedArray = [
+            'level1' => [
+                'level2' => 'nested value',
+            ],
+        ];
+
+        $result->addValidData('nested', $nestedArray);
+
+        $validData = $result->getValidData();
+        $this->assertArrayHasKey('nested', $validData);
+        $this->assertIsArray($validData['nested']);
+        $this->assertArrayHasKey('level1', $validData['nested']);
+        $this->assertEquals('nested value', $validData['nested']['level1']['level2']);
+    }
 }
