@@ -2,12 +2,15 @@
 
 namespace ValidatorPro\Core;
 
+use InvalidArgumentException;
 use ValidatorPro\Contracts\CompiledRulesInterface;
 use ValidatorPro\Contracts\ContextInterface;
 use ValidatorPro\Contracts\RuleInterface;
 use ValidatorPro\Contracts\RuleRegistryInterface;
 use ValidatorPro\Contracts\ValidationResultInterface;
+use ValidatorPro\Contracts\ValidationStrategyInterface;
 use ValidatorPro\Contracts\ValidatorInterface;
+use ValidatorPro\Validation\StopOnFirstErrorStrategy;
 
 /**
  * Main validator class for data validation.
@@ -41,13 +44,37 @@ class Validator implements ValidatorInterface
     private array $extensions = [];
 
     /**
+     * Current validation strategy.
+     *
+     * @var ValidationStrategyInterface
+     */
+    private ValidationStrategyInterface $strategy;
+
+    /**
      * Creates a new validator instance.
      *
      * @param RuleRegistryInterface $ruleRegistry Registry of available validation rules
+     * @param ValidationStrategyInterface|null $strategy Optional custom validation strategy
      */
-    public function __construct(RuleRegistryInterface $ruleRegistry)
-    {
+    public function __construct(
+        RuleRegistryInterface $ruleRegistry,
+        ?ValidationStrategyInterface $strategy = null
+    ) {
         $this->ruleRegistry = $ruleRegistry;
+        $this->strategy = $strategy ?? new StopOnFirstErrorStrategy($ruleRegistry);
+    }
+
+    /**
+     * Sets the validation strategy.
+     *
+     * @param ValidationStrategyInterface $strategy The validation strategy to use
+     * @return self The current instance for method chaining
+     */
+    public function setStrategy(ValidationStrategyInterface $strategy): self
+    {
+        $this->strategy = $strategy;
+
+        return $this;
     }
 
     /**
@@ -62,10 +89,6 @@ class Validator implements ValidatorInterface
     {
         $compiledRules = $this->compile($rules);
 
-        $validationResult = new ValidationResult();
-
-        $validData = [];
-
         $contextMessages = [];
         if ($this->context !== null) {
             $contextMessages = $this->context->getMessages();
@@ -73,35 +96,13 @@ class Validator implements ValidatorInterface
 
         $allMessages = array_merge($contextMessages, $messages);
 
-        foreach ($compiledRules->getCompiledRules() as $field => $fieldRules) {
-            if ($field === '_default' && count($compiledRules->getCompiledRules()) > 1) {
-                continue;
-            }
-
-            $actualField = $field === '_default' ? array_key_first($data) : $field;
-
-            $value = $this->getValueForField($actualField, $data);
-
-            $errors = $this->validateField($actualField, $value, $fieldRules, $data, $allMessages);
-
-            if (! empty($errors)) {
-                foreach ($errors as $error) {
-                    $validationResult->addError($actualField, $error);
-                }
-            } else {
-                if (array_key_exists($actualField, $data) || $this->getValueForField($actualField, $data) !== null) {
-                    $validData[$actualField] = $value;
-                }
-            }
+        // Set extensions on the strategy
+        if (method_exists($this->strategy, 'setExtensions')) {
+            $this->strategy->setExtensions($this->extensions);
         }
 
-        foreach ($validData as $field => $value) {
-            if (! $validationResult->hasError($field)) {
-                $validationResult->addValidData($field, $value);
-            }
-        }
-
-        return $validationResult;
+        // Delegate validation to the strategy
+        return $this->strategy->validate($data, $compiledRules, $allMessages);
     }
 
     /**
@@ -110,12 +111,12 @@ class Validator implements ValidatorInterface
      * @param string $name The rule name
      * @param callable|RuleInterface $rule The rule implementation
      * @return self The current instance for method chaining
-     * @throws \InvalidArgumentException If the rule is a callable but not a RuleInterface
+     * @throws InvalidArgumentException If the rule is a callable but not a RuleInterface
      */
     public function addRule(string $name, callable|RuleInterface $rule): self
     {
         if (is_callable($rule) && ! ($rule instanceof RuleInterface)) {
-            throw new \InvalidArgumentException("Callable rules are not supported yet. Please provide a RuleInterface instance.");
+            throw new InvalidArgumentException("Callable rules are not supported yet. Please provide a RuleInterface instance.");
         }
 
         if ($rule instanceof RuleInterface) {
@@ -204,145 +205,5 @@ class Validator implements ValidatorInterface
     public function getAvailableRules(): array
     {
         return $this->ruleRegistry->all();
-    }
-
-    /**
-     * Validates a single field against its rules.
-     *
-     * @param string $field The field name
-     * @param mixed $value The field value
-     * @param array<array<string, mixed>> $rules The rules for this field
-     * @param array<string, mixed> $data All data being validated
-     * @param array<string, string> $messages Custom error messages
-     * @return array<string> Array of error messages for this field
-     */
-    private function validateField(string $field, mixed $value, array $rules, array $data, array $messages = []): array
-    {
-        $errors = [];
-
-        foreach ($rules as $rule) {
-            $errorMessage = $this->validateRule($field, $value, $rule, $data, $messages);
-            if ($errorMessage !== null) {
-                $errors[] = $errorMessage;
-
-                break;
-            }
-        }
-
-        return $errors;
-    }
-
-    /**
-     * Validates a value against a specific rule.
-     *
-     * @param string $field The field name
-     * @param mixed $value The value to validate
-     * @param array<string, mixed> $rule The rule configuration
-     * @param array<string, mixed> $data All data being validated
-     * @param array<string, string> $messages Custom error messages
-     * @return string|null Error message if validation fails, null otherwise
-     * @throws \InvalidArgumentException If the rule is not registered
-     */
-    private function validateRule(string $field, mixed $value, array $rule, array $data, array $messages = []): ?string
-    {
-        $ruleName = $rule['name'];
-        $parameters = $rule['parameters'] ?? [];
-
-        if (isset($this->extensions[$ruleName])) {
-            $extension = $this->extensions[$ruleName];
-
-            if (is_callable($extension)) {
-                $valid = $extension($value, $parameters, $data);
-                if (! $valid) {
-                    return $this->getErrorMessage($field, $ruleName, $parameters, $messages);
-                }
-
-                return null;
-            }
-        }
-
-        $ruleInstance = $this->ruleRegistry->get($ruleName);
-
-        if (! $ruleInstance) {
-            throw new \InvalidArgumentException("Rule '{$ruleName}' is not registered.");
-        }
-
-        $ruleInstance->setParameters($parameters);
-
-        $valid = $ruleInstance->validate($value, $parameters, $data);
-
-        if (! $valid) {
-            return $this->getErrorMessage($field, $ruleName, $parameters, $messages, $ruleInstance->getMessage());
-        }
-
-        return null;
-    }
-
-    /**
-     * Gets the appropriate error message for a failed validation.
-     *
-     * @param string $field The field name
-     * @param string $ruleName The rule name
-     * @param array<mixed> $parameters The rule parameters
-     * @param array<string, string> $customMessages Custom error messages
-     * @param string|null $defaultMessage Default error message
-     * @return string The formatted error message
-     */
-    private function getErrorMessage(string $field, string $ruleName, array $parameters, array $customMessages, ?string $defaultMessage = null): string
-    {
-        $messageKey = "{$field}.{$ruleName}";
-
-        $message = $customMessages[$messageKey] ?? $customMessages[$ruleName] ?? $defaultMessage ?? "The {$field} field validation failed.";
-
-        return $this->formatMessage($message, $field, $parameters);
-    }
-
-    /**
-     * Formats an error message with field name and parameters.
-     *
-     * @param string $message The message template
-     * @param string $field The field name
-     * @param array<mixed> $parameters The parameters to insert
-     * @return string The formatted message
-     */
-    protected function formatMessage(string $message, string $field, array $parameters = []): string
-    {
-        $message = str_replace(':attribute', $field, $message);
-
-        foreach ($parameters as $key => $value) {
-            if (is_string($key)) {
-                $message = str_replace(":{$key}", (string)$value, $message);
-            } else {
-                $message = str_replace(":param{$key}", (string)$value, $message);
-            }
-        }
-
-        return $message;
-    }
-
-    /**
-     * Gets a value from data using dot notation.
-     *
-     * @param string $field The field name (can use dot notation)
-     * @param array<string, mixed> $data The data to extract from
-     * @return mixed The field value or null if not found
-     */
-    private function getValueForField(string $field, array $data): mixed
-    {
-        if (str_contains($field, '.')) {
-            $segments = explode('.', $field);
-            $current = $data;
-
-            foreach ($segments as $segment) {
-                if (! isset($current[$segment])) {
-                    return null;
-                }
-                $current = $current[$segment];
-            }
-
-            return $current;
-        }
-
-        return $data[$field] ?? null;
     }
 }
