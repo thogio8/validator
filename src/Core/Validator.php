@@ -112,7 +112,7 @@ class Validator implements ValidatorInterface
      * @return self The current instance for method chaining
      * @throws \InvalidArgumentException If the rule is a callable but not a RuleInterface
      */
-    public function addRule(string $name, $rule): self
+    public function addRule(string $name, callable|RuleInterface $rule): self
     {
         if (is_callable($rule) && ! ($rule instanceof RuleInterface)) {
             throw new \InvalidArgumentException("Callable rules are not supported yet. Please provide a RuleInterface instance.");

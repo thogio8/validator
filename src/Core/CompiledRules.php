@@ -17,14 +17,14 @@ class CompiledRules implements CompiledRulesInterface
      *
      * @var array<string, mixed>
      */
-    private array $rules = [];
+    private array $rules;
 
     /**
      * Compiled rules.
      *
      * @var array<string, array<mixed>>
      */
-    private array $compiledRules = [];
+    private array $compiledRules;
 
     /**
      * Creates a new instance of compiled rules.

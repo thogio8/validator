@@ -26,21 +26,21 @@ class ValidationContext implements ContextInterface
      *
      * @var array<string, mixed>
      */
-    private array $rules = [];
+    private array $rules;
 
     /**
      * Custom error messages for validation failures.
      *
      * @var array<string, string>
      */
-    private array $messages = [];
+    private array $messages;
 
     /**
      * Additional attributes associated with this context.
      *
      * @var array<string, mixed>
      */
-    private array $attributes = [];
+    private array $attributes;
 
     /**
      * Creates a new validation context with the given name.

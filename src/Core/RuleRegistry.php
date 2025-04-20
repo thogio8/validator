@@ -20,7 +20,7 @@ class RuleRegistry implements RuleRegistryInterface
      *
      * @var array<string, RuleInterface>
      */
-    private array $rules = [];
+    private array $rules;
 
     /**
      * Creates a new rule registry instance.

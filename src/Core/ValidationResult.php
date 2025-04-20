@@ -17,21 +17,21 @@ class ValidationResult implements ValidationResultInterface
      *
      * @var array<string, array<string>> Array of validation error messages indexed by field name
      */
-    private array $errors = [];
+    private array $errors;
 
     /**
      * Valid data that passed validation.
      *
      * @var array<string, mixed> Array of validated data indexed by field name
      */
-    private array $validData = [];
+    private array $validData;
 
     /**
      * List of fields that have been validated.
      *
      * @var array<string> Array of field names that have been validated
      */
-    private array $validatedFields = [];
+    private array $validatedFields;
 
     /**
      * Creates a new validation result instance.
@@ -160,7 +160,7 @@ class ValidationResult implements ValidationResultInterface
     public function getErrorCount(): int
     {
         $result = 0;
-        foreach ($this->errors as $field => $errorMessages) {
+        foreach ($this->errors as $errorMessages) {
             $result += count($errorMessages);
         }
 

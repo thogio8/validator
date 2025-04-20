@@ -27,7 +27,7 @@ interface ValidatorInterface
      * @param callable|RuleInterface $rule The rule implementation
      * @return self The current instance for method chaining
      */
-    public function addRule(string $name, $rule): self;
+    public function addRule(string $name, callable|RuleInterface $rule): self;
 
     /**
      * Sets the validation context.
