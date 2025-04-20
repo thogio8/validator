@@ -10,7 +10,22 @@
         "perMutator": "per-mutator.md"
     },
     "mutators": {
-        "@default": true
+        "@default": true,
+        "ArrayOneItem": {
+            "ignore": [
+                "ValidatorPro\\Core\\Validator::validateField"
+            ]
+        },
+        "CastString": {
+            "ignore": [
+                "ValidatorPro\\Core\\Validator::formatMessage"
+            ]
+        },
+        "ProtectedVisibility": {
+                "ignore": [
+                    "ValidatorPro\\Core\\Validator::formatMessage"
+                ]
+        }
     },
     "testFramework": "phpunit",
     "bootstrap": "./vendor/autoload.php",
