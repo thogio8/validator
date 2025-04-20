@@ -25,7 +25,7 @@
                 "ignore": [
                     "ValidatorPro\\Core\\Validator::formatMessage"
                 ]
-        }
+            }
     },
     "testFramework": "phpunit",
     "bootstrap": "./vendor/autoload.php",
