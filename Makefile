@@ -73,7 +73,7 @@ cs-fix:
 ## Run static analysis
 analyse:
 	@echo "${COLOR_INFO}Running static analysis avec PHPStan...${COLOR_RESET}"
-	$(DOCKER_COMPOSE) run --rm php-analyse ./vendor/bin/phpstan analyse src tests --configuration=phpstan.neon
+	$(DOCKER_COMPOSE) run --rm php-analyse ./vendor/bin/phpstan analyse src tests --configuration=phpstan.neon --memory-limit=256M
 
 ## Exécuter Psalm
 psalm:
