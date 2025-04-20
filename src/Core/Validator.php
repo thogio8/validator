@@ -110,6 +110,7 @@ class Validator implements ValidatorInterface
      * @param string $name The rule name
      * @param callable|RuleInterface $rule The rule implementation
      * @return self The current instance for method chaining
+     * @throws \InvalidArgumentException If the rule is a callable but not a RuleInterface
      */
     public function addRule(string $name, $rule): self
     {
@@ -240,6 +241,7 @@ class Validator implements ValidatorInterface
      * @param array<string, mixed> $data All data being validated
      * @param array<string, string> $messages Custom error messages
      * @return string|null Error message if validation fails, null otherwise
+     * @throws \InvalidArgumentException If the rule is not registered
      */
     private function validateRule(string $field, mixed $value, array $rule, array $data, array $messages = []): ?string
     {

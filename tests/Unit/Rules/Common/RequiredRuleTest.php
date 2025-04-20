@@ -107,7 +107,7 @@ class RequiredRuleTest extends TestCase
      */
     public function it_returns_correct_message(): void
     {
-        $this->assertStringContainsString('obligatoire', $this->rule->getMessage());
+        $this->assertStringContainsString('required', $this->rule->getMessage());
     }
 
     /**

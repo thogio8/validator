@@ -109,7 +109,7 @@ class CompiledRules implements CompiledRulesInterface
                             $this->compiledRules[$field][] = $parsedRule;
                         }
                     } elseif (is_array($singleRule) && isset($singleRule['name'])) {
-                        // C'est déjà au bon format
+                        // It's already in the correct format
                         $this->compiledRules[$field][] = $singleRule;
                     } else {
                         // Handle other cases

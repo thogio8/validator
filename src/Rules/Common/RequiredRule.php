@@ -18,7 +18,7 @@ class RequiredRule extends AbstractRule
      *
      * @var string
      */
-    protected string $message = 'Le champ :attribute est obligatoire';
+    protected string $message = 'The :attribute field is required';
 
     /**
      * Validates if the value is present and not empty.

@@ -4,29 +4,37 @@ namespace ValidatorPro\Rules\String;
 
 use ValidatorPro\Rules\AbstractRule;
 
+/**
+ * Rule to validate email addresses.
+ *
+ * This rule ensures that a value is a properly formatted email address
+ * using PHP's built-in email validation filter.
+ */
 class EmailRule extends AbstractRule
 {
     /**
+     * The error message for this validation rule.
+     *
      * @var string
      */
-    protected string $message = 'Le champ :attribute doit être une adresse email valide';
+    protected string $message = 'The :attribute must be a valid email address';
 
     /**
-     * Validate if the value is a valid email address
+     * Validates if the value is a valid email address.
      *
-     * @param mixed $value
-     * @param array<string, mixed> $parameters
-     * @param array<string, mixed> $data
-     * @return bool
+     * @param mixed $value The value to validate
+     * @param array<string, mixed> $parameters Optional parameters (not used by this rule)
+     * @param array<string, mixed> $data Optional data context (not used by this rule)
+     * @return bool True if validation passes, false otherwise
      */
     public function validate(mixed $value, array $parameters = [], array $data = []): bool
     {
-        // Vérifie que la valeur est une chaîne
+        // Check if the value is a string
         if (! is_string($value)) {
             return false;
         }
 
-        // Utilise le filtre de validation d'email de PHP
+        // Use PHP's email validation filter
         return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
     }
 }
